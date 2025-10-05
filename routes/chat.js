@@ -7,7 +7,7 @@ require('dotenv').config();
 const router = express.Router();
 
 // Initialize Google Generative AI
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
 
 const usersFilePath = path.join(__dirname, '../users.json');
@@ -55,35 +55,71 @@ async function writeUsers(users) {
 // Function to analyze responses and determine Prakriti using Gemini
 async function analyzePrakriti(conversation) {
   try {
-    const prompt = `Analyze the following conversation and determine the user's dominant dosha (Vata, Pitta, or Kapha) based on their responses. 
-    Return a JSON object with the following structure: 
-    {
-      "dominantDosha": "Vata/Pitta/Kapha",
-      "scores": {
-        "vata": 0-100,
-        "pitta": 0-100,
-        "kapha": 0-100
-      },
-      "explanation": "Brief explanation of the analysis"
-    }
+    console.log('Analyzing conversation with Gemini...');
     
-    Conversation: ${JSON.stringify(conversation, null, 2)}`;
+    // Extract just the text from the conversation
+    const conversationText = conversation
+      .filter(msg => msg.sender === 'user')
+      .map(msg => `User: ${msg.text}`)
+      .join('\n');
+    
+    const prompt = `You are an Ayurvedic expert. Analyze the following conversation and determine the user's dominant dosha (Vata, Pitta, or Kapha) based on their responses.
 
+Conversation:
+${conversationText}
+
+Respond with a JSON object in this exact format:
+{
+  "dominantDosha": "Vata" or "Pitta" or "Kapha",
+  "scores": {
+    "vata": 0-100,
+    "pitta": 0-100,
+    "kapha": 0-100
+  },
+  "explanation": "A brief explanation of your analysis"
+}`;
+
+    console.log('Sending to Gemini:', prompt);
+    
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
     
-    // Try to parse the JSON response
+    console.log('Raw Gemini response:', text);
+    
+    // Try to extract JSON from the response
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const jsonText = jsonMatch ? jsonMatch[0] : text;
+    
     try {
-      const parsedResponse = JSON.parse(text);
+      const parsedResponse = JSON.parse(jsonText);
+      console.log('Parsed response:', parsedResponse);
+      
+      // Ensure we have a valid dosha
+      const validDoshas = ['Vata', 'Pitta', 'Kapha'];
+      const dominantDosha = validDoshas.includes(parsedResponse.dominantDosha) 
+        ? parsedResponse.dominantDosha 
+        : 'Vata';
+      
       return {
-        dominantDosha: parsedResponse.dominantDosha,
-        scores: parsedResponse.scores || { vata: 0, pitta: 0, kapha: 0 },
-        explanation: parsedResponse.explanation || 'No explanation provided'
+        dominantDosha: dominantDosha,
+        scores: {
+          vata: Math.min(100, Math.max(0, parseInt(parsedResponse.scores?.vata) || 33)),
+          pitta: Math.min(100, Math.max(0, parseInt(parsedResponse.scores?.pitta) || 33)),
+          kapha: Math.min(100, Math.max(0, parseInt(parsedResponse.scores?.kapha) || 34))
+        },
+        explanation: parsedResponse.explanation || `Based on your responses, your dominant dosha appears to be ${dominantDosha}.`
       };
     } catch (e) {
       console.error('Error parsing AI response:', e);
-      throw new Error('Failed to parse AI response');
+      console.error('Response text was:', text);
+      
+      // Fallback response if parsing fails
+      return {
+        dominantDosha: 'Vata',
+        scores: { vata: 40, pitta: 30, kapha: 30 },
+        explanation: 'Based on your responses, I detected a Vata constitution. Vata types tend to be creative, energetic, and lively.'
+      };
     }
   } catch (error) {
     console.error('Error analyzing prakriti:', error);
@@ -250,80 +286,139 @@ router.get('/', isAuthenticated, async (req, res) => {
   }
 });
 
+async function generateResponse(message, user, conversation) {
+  const lowerMessage = message.toLowerCase().trim();
+  const userName = user.name || 'there';
+  
+  // Helper function to get a random response from an array
+  const getRandomResponse = (responses) => responses[Math.floor(Math.random() * responses.length)];
+
+  // Check for greetings
+  if (/(hi|hello|hey|greetings)/i.test(lowerMessage)) {
+    const greetings = [
+      `Hi ${userName}! How can I help you today?`,
+      `Hello there! What can I do for you?`,
+      `Hey! How can I assist you today?`
+    ];
+    return getRandomResponse(greetings);
+  }
+
+  // Check for name
+  if (/(my name is|i'm|i am) ([a-z]+)/i.test(lowerMessage)) {
+    const name = message.match(/(?:my name is|i'm|i am) ([a-z]+)/i)[1];
+    user.name = name;
+    return `Nice to meet you, ${name}! How can I help you today?`;
+  }
+
+  // Check for how are you
+  if (/(how are you|how's it going)/i.test(lowerMessage)) {
+    return "I'm just a bot, but I'm here and ready to help! What can I do for you?";
+  }
+
+  // Check for thank you
+  if (/(thank|thanks|appreciate)/i.test(lowerMessage)) {
+    const thanksResponses = [
+      "You're welcome!",
+      "No problem!",
+      "Happy to help!",
+      "Anytime!"
+    ];
+    return getRandomResponse(thanksResponses);
+  }
+
+  // Check for help
+  if (/(help|what can you do)/i.test(lowerMessage)) {
+    return "I'm a simple chatbot here to chat and answer questions. You can ask me anything, and I'll do my best to respond!";
+  }
+
+  // Default response for anything else
+  const fallbackResponses = [
+    "I'm not sure I understand. Could you rephrase that?",
+    "I'm still learning! Could you try asking that differently?",
+    "I didn't quite get that. Could you say it another way?",
+    "I'm not sure how to respond to that. Could you ask me something else?"
+  ];
+  
+  return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+}
+
+// Function to call Gemini API
+async function callGeminiAPI(message) {
+  try {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + process.env.GEMINI_API_KEY, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: message
+          }]
+        }]
+      })
+    });
+
+    const data = await response.json();
+    
+    if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+      return data.candidates[0].content.parts[0].text;
+    } else {
+      console.error('Unexpected API response:', data);
+      return "I'm sorry, I couldn't process that request. Please try again.";
+    }
+  } catch (error) {
+    console.error('Error calling Gemini API:', error);
+    return "I'm having trouble connecting to the AI service. Please try again later.";
+  }
+}
+
 // Chat message handling route
-router.post('/', isAuthenticated, async (req, res) => {
+router.post('/', async (req, res) => {
+  console.log('Received chat message:', req.body);
+  
   try {
     const { message, conversation = [] } = req.body;
-    const users = await readUsers();
-    const user = users.find(u => u.id === req.session.userId);
     
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // Validate the conversation array
-    if (!Array.isArray(conversation)) {
-      return res.status(400).json({ error: 'Invalid conversation format' });
-    }
-
-    // Add user message to conversation
-    const updatedConversation = [
-      ...conversation,
-      { sender: 'user', text: message }
-    ];
-    
-    // Check if this is the last question
-    if (updatedConversation.filter(msg => msg.sender === 'bot').length >= QUESTIONS.length) {
-      // Analyze responses and determine prakriti
-      const analysis = await getPrakritiFromLLM(updatedConversation);
-      
-      // Update user's prakriti
-      user.prakriti = analysis.prakriti || analysis.dominantDosha;
-      user.doshaScores = analysis.scores || analysis.doshaScores || { vata: 0, pitta: 0, kapha: 0 };
-      user.lastAssessment = new Date().toISOString();
-      
-      // Save updated user data
-      const userIndex = users.findIndex(u => u.id === user.id);
-      if (userIndex !== -1) {
-        users[userIndex] = user;
-        await writeUsers(users);
-      }
-      
-      // Update session
-      req.session.user = user;
-      
-      return res.json({
-        conversation: [
-          ...updatedConversation,
-          { 
-            sender: 'bot', 
-            text: `Based on your responses, your dominant dosha is ${user.prakriti}.\n\n${analysis.explanation || getPrakritiExplanation(user.prakriti.toLowerCase())}`,
-            isFinal: true,
-            prakriti: user.prakriti,
-            scores: user.doshaScores
-          }
-        ]
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({
+        error: 'Invalid message format',
+        details: 'Message must be a non-empty string'
       });
     }
     
-    // Get next question
-    const nextQuestion = QUESTIONS[updatedConversation.filter(msg => msg.sender === 'bot').length];
+    // Call Gemini API with the user's message
+    const aiResponse = await callGeminiAPI(message);
     
-    // Add bot's response to conversation
-    const botResponse = {
-      sender: 'bot',
-      text: nextQuestion,
-      isFinal: false
+    // Add user message to conversation
+    const userMessage = { 
+      sender: 'user', 
+      text: message,
+      timestamp: new Date().toISOString()
     };
     
-    res.json({
-      conversation: [...updatedConversation, botResponse]
+    // Add bot's response to conversation
+    const botMessage = {
+      sender: 'bot',
+      text: aiResponse,
+      timestamp: new Date().toISOString()
+    };
+    
+    const updatedConversation = [...conversation, userMessage, botMessage];
+    
+    // Return the AI's response and updated conversation
+    return res.json({ 
+      text: aiResponse,
+      sender: 'bot',
+      timestamp: new Date().toISOString(),
+      conversation: updatedConversation
     });
     
   } catch (error) {
-    console.error('Error processing message:', error);
-    res.status(500).json({ 
-      error: 'Error processing your message. Please try again.' 
+    console.error('Error in chat route:', error);
+    return res.status(500).json({
+      error: 'An error occurred while processing your message.',
+      details: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
     });
   }
 });

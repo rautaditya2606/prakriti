@@ -12,5 +12,12 @@
       "kapha": 13
     },
     "lastAssessment": "2025-10-05T12:59:13.847Z"
+  },
+  {
+    "id": 2,
+    "name": "test",
+    "email": "souladityaftw@gmail.com",
+    "password": "$2b$10$itAuDH6QiZyzh3xltElb3exBOly4C0ghCZr7zqI1wMDtu7Lemk.gq",
+    "prakriti": null
   }
 ]

@@ -416,7 +416,16 @@
         if (messageInput) {
             messageInput.addEventListener('input', function() {
                 this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+            
+            // Allow Shift+Enter for new line, Enter to send
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    const submitEvent = new Event('submit', { cancelable: true });
+                    messageForm.dispatchEvent(submitEvent);
+                }
             });
         }
 
@@ -425,47 +434,172 @@
         const chatMessages = document.getElementById('chatMessages');
         const typingIndicator = document.getElementById('typingIndicator');
         
+        // Store conversation history
+        let conversation = [];
+        
+        // Initial bot message
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                addBotMessage("Hello! I'm your Prakriti assistant. How can I help you with your Ayurvedic journey today?");
+            }, 500);
+        });
+        
         if (messageForm && chatMessages) {
-            messageForm.addEventListener('submit', function(e) {
+            messageForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
                 const messageText = messageInput.value.trim();
                 if (!messageText) return;
                 
-                // Add user message
-                addMessage('user', messageText);
-                messageInput.value = '';
-                messageInput.style.height = 'auto';
+                // Disable input while processing
+                messageInput.disabled = true;
+                const sendButton = messageForm.querySelector('button[type="submit"]');
+                if (sendButton) sendButton.disabled = true;
                 
-                // Show typing indicator
-                typingIndicator.style.display = 'flex';
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Simulate bot response after a delay
-                setTimeout(() => {
-                    typingIndicator.style.display = 'none';
-                    addMessage('bot', "I'm your Prakriti assistant. How can I help you with your Ayurvedic journey?");
-                }, 1000);
+                try {
+                    // Add user message to UI
+                    addUserMessage(messageText);
+                    
+                    // Add to conversation history
+                    conversation.push({
+                        sender: 'user',
+                        text: messageText,
+                        timestamp: new Date().toISOString()
+                    });
+                    
+                    // Show typing indicator
+                    showTypingIndicator();
+                    
+                    // Send message to server
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: messageText,
+                            conversation: conversation
+                        }),
+                        credentials: 'same-origin'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    // Update conversation history
+                    conversation = data.conversation || [];
+                    
+                    // Add bot's response to UI
+                    const lastMessage = conversation[conversation.length - 1];
+                    if (lastMessage && lastMessage.sender === 'bot') {
+                        addBotMessage(lastMessage.text, lastMessage);
+                    }
+                    
+                } catch (error) {
+                    console.error('Error sending message:', error);
+                    addBotMessage("I'm sorry, I encountered an error. Please try again.");
+                } finally {
+                    // Re-enable input
+                    messageInput.disabled = false;
+                    if (sendButton) sendButton.disabled = false;
+                    messageInput.focus();
+                    hideTypingIndicator();
+                }
             });
         }
 
-        // Add a new message to the chat
-        function addMessage(sender, text) {
+        // Add a user message to the chat
+        function addUserMessage(text) {
             if (!chatMessages) return;
             
             const messageDiv = document.createElement('div');
-            messageDiv.className = `message message-${sender}`;
+            messageDiv.className = 'message message-user';
             
             const now = new Date();
             const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             
+            // Convert newlines to <br> and escape HTML
+            const formattedText = text.replace(/\n/g, '<br>').replace(/[&<>]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;'
+                }[tag]));
+            
             messageDiv.innerHTML = `
-                <div>${text}</div>
+                <div class="message-content">${formattedText}</div>
                 <div class="message-time">${timeString}</div>
             `;
             
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+        }
+        
+        // Add a bot message to the chat
+        function addBotMessage(text, messageData = {}) {
+            if (!chatMessages) return;
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-bot';
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            // Convert newlines to <br> and escape HTML
+            let formattedText = text.replace(/\n/g, '<br>').replace(/[&<>]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;'
+                }[tag]));
+            
+            // Add prakriti result if available
+            if (messageData.prakriti) {
+                formattedText += `\n\n<strong>Your Prakriti: ${messageData.prakriti}</strong>`;
+                if (messageData.scores) {
+                    formattedText += `\nVata: ${messageData.scores.vata || 0}% | `;
+                    formattedText += `Pitta: ${messageData.scores.pitta || 0}% | `;
+                    formattedText += `Kapha: ${messageData.scores.kapha || 0}%`;
+                }
+            }
+            
+            messageDiv.innerHTML = `
+                <div class="message-content">${formattedText}</div>
+                <div class="message-time">${timeString} <i class="fas fa-robot"></i></div>
+            `;
+            
+            // Remove any existing typing indicator
+            hideTypingIndicator();
+            
+            // Add to chat with typing effect
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Show typing indicator
+        function showTypingIndicator() {
+            if (!typingIndicator) return;
+            
+            typingIndicator.style.display = 'flex';
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Hide typing indicator
+        function hideTypingIndicator() {
+            if (!typingIndicator) return;
+            
+            typingIndicator.style.display = 'none';
+            if (typingIndicator.parentNode === chatMessages) {
+                chatMessages.removeChild(typingIndicator);
+            }
         }
     </script>
 </body>
