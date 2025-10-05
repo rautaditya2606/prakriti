@@ -1,0 +1,161 @@
+<%- include('partials/head', { title: 'Prakriti Assessment - Discover Your Ayurvedic Constitution' }) %>
+
+<div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-4xl mx-auto">
+    <!-- Progress Bar -->
+    <div class="mb-8">
+      <div class="flex justify-between mb-2">
+        <span class="text-sm font-medium text-indigo-700">Step <span id="currentStep">1</span> of <span id="totalSteps">20</span></span>
+        <span class="text-sm font-medium text-indigo-700"><span id="progressPercent">5</span>% Complete</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2.5">
+        <div id="progressBar" class="bg-indigo-600 h-2.5 rounded-full" style="width: 5%"></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <!-- Question Card -->
+      <div class="p-8">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold text-gray-900 mb-2">Prakriti Assessment</h2>
+          <p class="text-gray-600">Answer these questions to discover your unique Ayurvedic constitution</p>
+        </div>
+
+        <form id="prakritiForm" action="/prakriti/questionnaire" method="POST">
+          <div id="questionContainer">
+            <!-- Questions will be dynamically inserted here -->
+            <div class="question-card" data-question="1" style="display: block;">
+              <h3 class="text-xl font-semibold text-gray-800 mb-6">1. How would you describe your body frame?</h3>
+              <div class="space-y-4">
+                <label class="option-card">
+                  <input type="radio" name="q1" value="a" class="hidden peer" required>
+                  <div class="p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
+                    <div class="font-medium text-gray-800">Slender, thin-boned, and light</div>
+                    <p class="text-sm text-gray-500 mt-1">Vata-dominant characteristic</p>
+                  </div>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="q1" value="b" class="hidden peer">
+                  <div class="p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
+                    <div class="font-medium text-gray-800">Medium build, well-proportioned</div>
+                    <p class="text-sm text-gray-500 mt-1">Pitta-dominant characteristic</p>
+                  </div>
+                </label>
+                <label class="option-card">
+                  <input type="radio" name="q1" value="c" class="hidden peer">
+                  <div class="p-4 border-2 border-gray-200 rounded-lg cursor-pointer transition-all hover:border-indigo-300 peer-checked:border-indigo-500 peer-checked:bg-indigo-50">
+                    <div class="font-medium text-gray-800">Solid, heavy, and well-built</div>
+                    <p class="text-sm text-gray-500 mt-1">Kapha-dominant characteristic</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-8 flex justify-between">
+            <button type="button" id="prevBtn" class="hidden px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+              Previous
+            </button>
+            <button type="button" id="nextBtn" class="ml-auto px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+              Next Question
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="mt-8 text-center text-sm text-gray-500">
+      <p>Your answers will help us determine your unique Prakriti (constitution) according to Ayurveda.</p>
+      <p class="mt-1">This assessment typically takes about 5-7 minutes to complete.</p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .option-card {
+    display: block;
+  }
+  .option-card input:checked + div {
+    border-color: #6366f1;
+    background-color: #eef2ff;
+  }
+  .question-card {
+    display: none;
+    animation: fadeIn 0.3s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('prakritiForm');
+    const questionContainer = document.getElementById('questionContainer');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressBar = document.getElementById('progressBar');
+    const currentStepEl = document.getElementById('currentStep');
+    const totalStepsEl = document.getElementById('totalSteps');
+    const progressPercentEl = document.getElementById('progressPercent');
+    
+    let currentQuestion = 1;
+    const totalQuestions = 20; // Update this based on actual number of questions
+    totalStepsEl.textContent = totalQuestions;
+    
+    // Update progress
+    function updateProgress() {
+      const progress = (currentQuestion / totalQuestions) * 100;
+      progressBar.style.width = `${progress}%`;
+      progressPercentEl.textContent = Math.round(progress);
+      currentStepEl.textContent = currentQuestion;
+    }
+    
+    // Show specific question
+    function showQuestion(questionNum) {
+      document.querySelectorAll('.question-card').forEach(card => {
+        card.style.display = 'none';
+      });
+      document.querySelector(`.question-card[data-question="${questionNum}"]`).style.display = 'block';
+      
+      // Update button states
+      prevBtn.classList.toggle('hidden', questionNum === 1);
+      nextBtn.textContent = questionNum === totalQuestions ? 'See Results' : 'Next Question';
+      
+      // Update progress
+      updateProgress();
+    }
+    
+    // Next button click
+    nextBtn.addEventListener('click', function() {
+      const currentQuestionEl = document.querySelector(`.question-card[data-question="${currentQuestion}"]`);
+      const selectedOption = currentQuestionEl.querySelector('input:checked');
+      
+      if (!selectedOption && currentQuestionEl.querySelector('input[required]')) {
+        alert('Please select an option to continue');
+        return;
+      }
+      
+      if (currentQuestion < totalQuestions) {
+        currentQuestion++;
+        showQuestion(currentQuestion);
+      } else {
+        form.submit();
+      }
+    });
+    
+    // Previous button click
+    prevBtn.addEventListener('click', function() {
+      if (currentQuestion > 1) {
+        currentQuestion--;
+        showQuestion(currentQuestion);
+      }
+    });
+    
+    // Initialize
+    showQuestion(1);
+  });
+</script>
+
+<%- include('partials/footer') %>

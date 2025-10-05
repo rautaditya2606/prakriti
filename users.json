@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "Aditya Raut",
+    "email": "rautaditya2606@gmail.com",
+    "password": "$2b$10$F4ZDtltqmMAnI4Zw788N7Ov24Gf5SgP0zuIt8flmKqzzwO.cQFE7O",
+    "prakriti": "Pitta",
+    "explanation": "Pitta types are intense, intelligent, and goal-oriented. They have a medium build and tend to be focused and determined. When in balance, Pittas are strong leaders with a sharp intellect. When out of balance, they may become irritable, impatient, or prone to inflammation.",
+    "doshaScores": {
+      "vata": 0,
+      "pitta": 88,
+      "kapha": 13
+    },
+    "lastAssessment": "2025-10-05T12:59:13.847Z"
+  }
+]

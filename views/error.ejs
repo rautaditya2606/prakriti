@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Prakriti Diagnosis</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Prakriti Diagnosis</h1>
+            <nav>
+                <a href="/">Home</a>
+                <% if (user) { %>
+                    <a href="/dashboard">Dashboard</a>
+                    <a href="/chat">Chat</a>
+                    <a href="/auth/logout">Logout</a>
+                <% } else { %>
+                    <a href="/auth/login">Login</a>
+                    <a href="/auth/signup">Sign Up</a>
+                <% } %>
+            </nav>
+        </header>
+
+        <main class="error-container">
+            <h2>Error</h2>
+            <p class="error-message"><%= message %></p>
+            <a href="/" class="btn">Return to Home</a>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 Prakriti Diagnosis. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>
