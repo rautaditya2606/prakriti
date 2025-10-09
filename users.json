@@ -9,7 +9,7 @@
     "doshaScores": {
       "vata": 0,
       "pitta": 88,
-      "kapha": 13
+      "kapha": 12
     },
     "lastAssessment": "2025-10-05T12:59:13.847Z"
   },
@@ -18,6 +18,34 @@
     "name": "test",
     "email": "souladityaftw@gmail.com",
     "password": "$2b$10$itAuDH6QiZyzh3xltElb3exBOly4C0ghCZr7zqI1wMDtu7Lemk.gq",
-    "prakriti": null
+    "prakriti": "Pitta"
+  },
+  {
+    "id": 3,
+    "name": "test2",
+    "email": "hi@gmail.com",
+    "password": "$2b$10$0k8ILGkx7VJO.uBQp7G/sO4CzAG6uyGTS.wt1R7iZtXoSuORl1RLy",
+    "prakriti": "Vata",
+    "explanation": "Based on your responses, your dominant dosha appears to be Vata.",
+    "doshaScores": {
+      "vata": 65,
+      "pitta": 15,
+      "kapha": 20
+    },
+    "lastAssessment": "2025-10-09T03:59:24.357Z"
+  },
+  {
+    "id": 4,
+    "name": "test4 ",
+    "email": "no@gmail.com",
+    "password": "$2b$10$FAAOXDbIxD6KpYV.Q865UOgYKLLPYUQT/pO5JodVil0rPoDoauuXm",
+    "prakriti": "Vata",
+    "explanation": "Based on your responses, your dominant dosha appears to be Vata.",
+    "doshaScores": {
+      "vata": 80,
+      "pitta": 10,
+      "kapha": 10
+    },
+    "lastAssessment": "2025-10-09T04:04:01.022Z"
   }
 ]

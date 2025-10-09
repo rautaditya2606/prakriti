@@ -7,6 +7,115 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Navigation Styles */
+        nav {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 0.75rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            margin-left: 2rem;
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.75rem 0;
+            position: relative;
+            transition: var(--transition);
+            font-size: 0.95rem;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--gray-700);
+            font-size: 0.95rem;
+        }
+
+        .btn-logout {
+            color: var(--gray-500);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+        }
+
+        .btn-logout:hover {
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .nav-container {
+                padding: 0.5rem 1rem;
+            }
+            
+            .logo {
+                font-size: 1.25rem;
+            }
+            
+            .user-name {
+                display: none;
+            }
+        }
+
         :root {
             --primary-color: #4f46e5;
             --primary-light: #818cf8;
@@ -31,30 +140,17 @@
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-            --radius-sm: 0.25rem;
             --radius-md: 0.5rem;
             --radius-lg: 0.75rem;
             --radius-xl: 1rem;
             --radius-full: 9999px;
             --transition: all 0.2s ease-in-out;
-        }
-
+        <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        }
-
-        body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-            background-color: var(--gray-50);
-            color: var(--gray-800);
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
 
         .container {
@@ -333,6 +429,26 @@
     </style>
 </head>
 <body>
+
+
+    <nav>
+        <div class="nav-container">
+            <a href="/prakriti" class="logo">Prakriti</a>
+            <div class="nav-links">
+                <a href="/prakriti" class="nav-link">Dashboard</a>
+                <a href="/prakriti/questionnaire" class="nav-link">New Assessment</a>
+                <a href="/chat" class="nav-link active">Prakriti Chatbot</a>
+            </div>
+            <div class="user-menu">
+                <span class="user-name"><%= user.name %></span>
+                <a href="/auth/logout" class="btn-logout" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+
     <div class="chat-container">
         <!-- Sidebar -->
         <aside class="chat-sidebar" id="chatSidebar">
@@ -348,29 +464,29 @@
         <main class="chat-main">
             <!-- Chat Header -->
             <header class="chat-header">
-                <button class="mobile-menu-btn btn-icon" id="mobileMenuBtn">
+                <!-- <button class="mobile-menu-btn btn-icon" id="mobileMenuBtn">
                     <i class="fas fa-bars"></i>
-                </button>
+                </button> -->
                 <div class="chat-header-info">
                     <h3>Prakriti Assistant</h3>
                 </div>
                 <div class="chat-header-actions">
-                    <button class="btn-icon" title="Search">
+                    <!-- <button class="btn-icon" title="Search">
                         <i class="fas fa-search"></i>
                     </button>
                     <button class="btn-icon" title="More options">
                         <i class="fas fa-ellipsis-v"></i>
-                    </button>
+                    </button> -->
                 </div>
             </header>
 
             <!-- Messages -->
             <div class="chat-messages" id="chatMessages">
                 <!-- Welcome Message -->
-                <div class="message message-bot">
+                <!-- <div class="message message-bot">
                     <div>Hello! I'm your Prakriti assistant. How can I help you today?</div>
                     <div class="message-time">Just now</div>
-                </div>
+                </div> -->
 
                 <!-- Messages will be dynamically added here -->
             </div>

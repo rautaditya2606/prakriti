@@ -35,11 +35,14 @@ app.use((req, res, next) => {
 // Routes
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
-const chatRoutes = require('./routes/chat');
+const chatModule = require('./routes/chat');
+const chatRoutes = chatModule.router;
+const prakritiRoutes = require('./routes/prakriti');
 
 // Mount routes
 app.use('/auth', authRoutes);
 app.use('/prakriti', dashboardRoutes);
+app.use('/prakriti', prakritiRoutes); // Add this line to include prakriti routes
 app.use('/chat', chatRoutes);
 
 // Home route

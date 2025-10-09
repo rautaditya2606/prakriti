@@ -423,4 +423,9 @@ router.post('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+// Export the router and utility functions
+module.exports = {
+  router,
+  analyzePrakriti,
+  getPrakritiExplanation
+};
