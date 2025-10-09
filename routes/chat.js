@@ -272,8 +272,18 @@ router.get('/', isAuthenticated, async (req, res) => {
       });
     }
     
+    // Format user data for the template
+    const userData = {
+      ...user,
+      prakriti: {
+        type: user.prakriti,
+        description: user.explanation,
+        scores: user.doshaScores
+      }
+    };
+    
     res.render('chat', { 
-      user: user,
+      user: userData,
       title: 'Chat - Prakriti Diagnosis',
       conversation: []
     });

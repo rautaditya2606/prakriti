@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Prakriti</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #4338ca;
+            --secondary-color: #10b981;
+            --accent-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --radius-sm: 0.25rem;
+            --radius: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            --radius-full: 9999px;
+            --transition: all 0.2s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: white;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--gray-600);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .search-box {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.625rem 1rem 0.625rem 2.5rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+        }
+
+        /* Users Grid */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .user-card {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .user-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .user-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .user-info h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.25rem;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .user-details {
+            padding: 1.5rem;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.9375rem;
+        }
+
+        .detail-label {
+            color: var(--gray-600);
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--gray-800);
+        }
+
+        .prakriti-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .vata { background-color: #EFF6FF; color: #1E40AF; }
+        .pitta { background-color: #FEF2F2; color: #B91C1C; }
+        .kapha { background-color: #F0FDF4; color: #065F46; }
+
+        .progress-container {
+            margin-top: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            margin-bottom: 0.25rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: var(--gray-100);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .vata .progress-fill { background-color: #3B82F6; }
+        .pitta .progress-fill { background-color: #EF4444; }
+        .kapha .progress-fill { background-color: #10B981; }
+
+        .user-actions {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: white;
+            border-color: var(--gray-300);
+            color: var(--gray-700);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+        /* No Users Message */
+        .no-users {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--gray-500);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <i class="fas fa-leaf"></i>
+                <span>Prakriti</span>
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Home</a>
+                <a href="/questionnaire" class="nav-link">Assessment</a>
+                <a href="/chat" class="nav-link">Chat</a>
+                <a href="/profile" class="nav-link active">Users</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">User Management</h1>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search users...">
+                </div>
+            </div>
+
+            <div class="users-grid" id="usersGrid">
+                <!-- Users will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // User data from the server
+        const users = <%- JSON.stringify(users) || '[]' %>;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const usersGrid = document.getElementById('usersGrid');
+            const searchInput = document.getElementById('searchInput');
+            
+            // Render users
+            function renderUsers(usersToRender) {
+                if (usersToRender.length === 0) {
+                    usersGrid.innerHTML = `
+                        <div class="no-users">
+                            <p>No users found</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                usersGrid.innerHTML = usersToRender.map(user => {
+                    const lastAssessed = user.lastAssessment ? 
+                        new Date(user.lastAssessment).toLocaleDateString('en-US', { 
+                            year: 'numeric', 
+                            month: 'short', 
+                            day: 'numeric'
+                        }) : 'Not assessed';
+                    
+                    return `
+                        <div class="user-card">
+                            <div class="user-header">
+                                <div class="user-avatar">
+                                    ${user.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="user-info">
+                                    <h3>${user.name}</h3>
+                                    <div class="user-email">${user.email}</div>
+                                </div>
+                            </div>
+                            <div class="user-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Prakriti Type:</span>
+                                    <span class="prakriti-badge ${user.prakriti?.toLowerCase() || ''}">
+                                        ${user.prakriti || 'Not assessed'}
+                                    </span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Last Assessed:</span>
+                                    <span class="detail-value">${lastAssessed}</span>
+                                </div>
+                                ${user.doshaScores ? `
+                                    <div class="progress-container">
+                                        <div class="progress-label">
+                                            <span>Vata</span>
+                                            <span>${user.doshaScores.vata || 0}%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill vata" style="width: ${user.doshaScores.vata || 0}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-label">
+                                            <span>Pitta</span>
+                                            <span>${user.doshaScores.pitta || 0}%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill pitta" style="width: ${user.doshaScores.pitta || 0}%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-container">
+                                        <div class="progress-label">
+                                            <span>Kapha</span>
+                                            <span>${user.doshaScores.kapha || 0}%</span>
+                                        </div>
+                                        <div class="progress-bar">
+                                            <div class="progress-fill kapha" style="width: ${user.doshaScores.kapha || 0}%"></div>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                ${user.explanation ? `
+                                    <div class="detail-row" style="margin-top: 1rem;">
+                                        <p style="font-size: 0.875rem; color: var(--gray-600);">
+                                            ${user.explanation.length > 100 ? 
+                                                user.explanation.substring(0, 100) + '...' : 
+                                                user.explanation}
+                                        </p>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <div class="user-actions">
+                                <button class="btn btn-outline" onclick="viewUserDetails(${user.id})">
+                                    View Details
+                                </button>
+                                <button class="btn btn-primary" onclick="startChat(${user.id})">
+                                    Chat
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Search functionality
+            function filterUsers(searchTerm) {
+                if (!searchTerm) {
+                    return users;
+                }
+                
+                const term = searchTerm.toLowerCase();
+                return users.filter(user => 
+                    user.name.toLowerCase().includes(term) ||
+                    user.email.toLowerCase().includes(term) ||
+                    (user.prakriti && user.prakriti.toLowerCase().includes(term))
+                );
+            }
+            
+            // Event listeners
+            searchInput.addEventListener('input', (e) => {
+                const filteredUsers = filterUsers(e.target.value);
+                renderUsers(filteredUsers);
+            });
+            
+            // Global functions for buttons
+            window.viewUserDetails = function(userId) {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    // In a real app, you would navigate to a detailed view
+                    alert(`Viewing details for ${user.name}\nEmail: ${user.email}\nPrakriti: ${user.prakriti || 'Not assessed'}`);
+                }
+            };
+            
+            window.startChat = function(userId) {
+                const user = users.find(u => u.id === userId);
+                if (user) {
+                    // In a real app, you would navigate to the chat interface
+                    alert(`Starting chat with ${user.name}`);
+                }
+            };
+            
+            // Initial render
+            renderUsers(users);
+        });
+    </script>
+</body>
+</html>
