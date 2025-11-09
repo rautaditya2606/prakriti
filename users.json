@@ -18,7 +18,14 @@
     "name": "test",
     "email": "souladityaftw@gmail.com",
     "password": "$2b$10$itAuDH6QiZyzh3xltElb3exBOly4C0ghCZr7zqI1wMDtu7Lemk.gq",
-    "prakriti": "Pitta"
+    "prakriti": "Pitta",
+    "explanation": "Pitta types are intense, intelligent, and goal-oriented. They have a medium build and tend to be focused and determined. When in balance, Pittas are strong leaders with a sharp intellect. When out of balance, they may become irritable, impatient, or prone to inflammation.",
+    "doshaScores": {
+      "vata": 10,
+      "pitta": 80,
+      "kapha": 10
+    },
+    "lastAssessment": "2025-10-09T03:59:24.357Z"
   },
   {
     "id": 3,
@@ -26,7 +33,7 @@
     "email": "hi@gmail.com",
     "password": "$2b$10$0k8ILGkx7VJO.uBQp7G/sO4CzAG6uyGTS.wt1R7iZtXoSuORl1RLy",
     "prakriti": "Vata",
-    "explanation": "Based on your responses, your dominant dosha appears to be Vata.",
+    "explanation": "Vata types are creative, energetic, and lively. They tend to be thin, light, and quick in their thoughts and actions. When in balance, Vatas are flexible and have a joyful, enthusiastic outlook. When out of balance, they may experience anxiety, insomnia, or digestive issues.",
     "doshaScores": {
       "vata": 65,
       "pitta": 15,
@@ -40,12 +47,19 @@
     "email": "no@gmail.com",
     "password": "$2b$10$FAAOXDbIxD6KpYV.Q865UOgYKLLPYUQT/pO5JodVil0rPoDoauuXm",
     "prakriti": "Vata",
-    "explanation": "Based on your responses, your dominant dosha appears to be Vata.",
+    "explanation": "Vata types are creative, energetic, and lively. They tend to be thin, light, and quick in their thoughts and actions. When in balance, Vatas are flexible and have a joyful, enthusiastic outlook. When out of balance, they may experience anxiety, insomnia, or digestive issues.",
     "doshaScores": {
       "vata": 80,
       "pitta": 10,
       "kapha": 10
     },
     "lastAssessment": "2025-10-09T04:04:01.022Z"
+  },
+  {
+    "id": 5,
+    "name": "Aditya ",
+    "email": "rautaditya@gmail.com",
+    "password": "$2b$10$BeVXROqbYLsbPxaZp5iSYeVCMYVkOyVMccOXw6SbK.d38n4K8M7Ky",
+    "prakriti": null
   }
 ]

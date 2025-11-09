@@ -206,6 +206,13 @@
             margin-bottom: 1rem;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--gray-200);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .prakriti-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         
         .prakriti-card h3 {
@@ -561,6 +568,26 @@
         </main>
     </div>
 
+    <form id="chat-form">
+        <label for="prakriti">Select Your Prakriti:</label>
+        <select id="prakriti" name="prakriti">
+            <option value="Vata">Vata</option>
+            <option value="Pitta">Pitta</option>
+            <option value="Kapha">Kapha</option>
+        </select>
+
+        <label for="traits">Traits (comma-separated):</label>
+        <input type="text" id="traits" name="traits" placeholder="e.g., intense, intelligent">
+
+        <label for="imbalances">Imbalances (comma-separated):</label>
+        <input type="text" id="imbalances" name="imbalances" placeholder="e.g., irritability, impatience">
+
+        <label for="message">Your Message:</label>
+        <textarea id="message" name="message" required></textarea>
+
+        <button type="submit">Send</button>
+    </form>
+
     <script>
         // Mobile menu toggle
         const mobileMenuBtn = document.getElementById('mobileMenuBtn');
@@ -706,39 +733,32 @@
         // Add a bot message to the chat
         function addBotMessage(text, messageData = {}) {
             if (!chatMessages) return;
-            
+
             const messageDiv = document.createElement('div');
             messageDiv.className = 'message message-bot';
-            
+
             const now = new Date();
             const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
+
+            // STRIP HTML TAGS - This is the key fix
+            let plainText = text.replace(/<[^>]*>/g, ''); // Remove all HTML tags
+
             // Convert newlines to <br> and escape HTML
-            let formattedText = text.replace(/\n/g, '<br>').replace(/[&<>]/g, 
+            let formattedText = plainText.replace(/\n/g, '<br>').replace(/[&<>]/g, 
                 tag => ({
                     '&': '&amp;',
                     '<': '&lt;',
                     '>': '&gt;'
                 }[tag]));
-            
-            // Add prakriti result if available
-            if (messageData.prakriti) {
-                formattedText += `\n\n<strong>Your Prakriti: ${messageData.prakriti}</strong>`;
-                if (messageData.scores) {
-                    formattedText += `\nVata: ${messageData.scores.vata || 0}% | `;
-                    formattedText += `Pitta: ${messageData.scores.pitta || 0}% | `;
-                    formattedText += `Kapha: ${messageData.scores.kapha || 0}%`;
-                }
-            }
-            
+
             messageDiv.innerHTML = `
                 <div class="message-content">${formattedText}</div>
                 <div class="message-time">${timeString} <i class="fas fa-robot"></i></div>
             `;
-            
+
             // Remove any existing typing indicator
             hideTypingIndicator();
-            
+
             // Add to chat with typing effect
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -762,6 +782,66 @@
                 chatMessages.removeChild(typingIndicator);
             }
         }
+
+        // Add event listener for prakriti-card click
+        const prakritiCard = document.querySelector('.prakriti-card');
+        if (prakritiCard) {
+            prakritiCard.addEventListener('click', async () => {
+                try {
+                    const prakritiContent = prakritiCard.querySelector('.prakriti-description')?.innerText || 'No description available';
+
+                    // Add the content as a user message
+                    addUserMessage(prakritiContent);
+
+                    // Send the content to the server as a user response
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: prakritiContent,
+                            conversation: conversation
+                        }),
+                        credentials: 'same-origin'
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Failed to send prakriti content');
+                    }
+
+                    const data = await response.json();
+
+                    // Add bot's response to the chat
+                    const lastMessage = data.conversation[data.conversation.length - 1];
+                    if (lastMessage && lastMessage.sender === 'bot') {
+                        addBotMessage(lastMessage.text, lastMessage);
+                    }
+                } catch (error) {
+                    console.error('Error sending prakriti content:', error);
+                    addBotMessage('Sorry, there was an error sending your prakriti content.');
+                }
+            });
+        }
+
+        // Prakriti chat form submission
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const prakriti = document.getElementById('prakriti').value;
+            const traits = document.getElementById('traits').value.split(',').map(t => t.trim());
+            const imbalances = document.getElementById('imbalances').value.split(',').map(i => i.trim());
+            const message = document.getElementById('message').value;
+
+            const response = await fetch('/chat/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prakriti, traits, imbalances, message })
+            });
+
+            const data = await response.json();
+            console.log(data.reply); // Display the chatbot's reply
+        });
     </script>
 </body>
 </html>

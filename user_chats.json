@@ -1,0 +1,21 @@
+[
+  {
+    "userId": 1,
+    "chats": [
+      {
+        "sender": "user",
+        "message": "Hello, how are you?",
+        "timestamp": "2025-10-11T10:00:00Z"
+      },
+      {
+        "sender": "bot",
+        "message": "I am fine, thank you! How can I assist you today?",
+        "timestamp": "2025-10-11T10:00:05Z"
+      }
+    ]
+  },
+  {
+    "userId": 2,
+    "chats": []
+  }
+]
