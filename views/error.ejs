@@ -3,35 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error - Prakriti Diagnosis</title>
+    <title>Error</title>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .error-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            background-color: var(--color-gray-50);
+            color: var(--color-gray-800);
+            padding: var(--spacing-8);
+        }
+
+        .error-container h1 {
+            font-size: 4rem;
+            color: var(--color-danger);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .error-container h2 {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-3);
+        }
+
+        .error-container p {
+            font-size: 1.25rem;
+            margin-bottom: var(--spacing-6);
+        }
+
+        .error-container a {
+            display: inline-block;
+            padding: var(--spacing-2) var(--spacing-4);
+            background-color: var(--color-primary);
+            color: #fff;
+            text-decoration: none;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .error-container a:hover {
+            background-color: var(--color-primary-dark);
+            box-shadow: var(--shadow-md);
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Prakriti Diagnosis</h1>
-            <nav>
-                <a href="/">Home</a>
-                <% if (user) { %>
-                    <a href="/dashboard">Dashboard</a>
-                    <a href="/chat">Chat</a>
-                    <a href="/auth/logout">Logout</a>
-                <% } else { %>
-                    <a href="/auth/login">Login</a>
-                    <a href="/auth/signup">Sign Up</a>
-                <% } %>
-            </nav>
-        </header>
-
-        <main class="error-container">
-            <h2>401 - Unauthorized</h2>
-            <p class="error-message">You are not authorized to access this page.</p>
-            <a href="/" class="btn">Return to Home</a>
-        </main>
-
-        <footer>
-            <p>&copy; 2025 Prakriti Diagnosis. All rights reserved.</p>
-        </footer>
+    <div class="error-container">
+        <h1>Error</h1>
+        <h2><%= errorCode %> - <%= errorMessage %></h2>
+        <p><%= errorDescription %></p>
+        <a href="/">Go Back to Home</a>
     </div>
 </body>
 </html>

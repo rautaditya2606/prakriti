@@ -61,5 +61,19 @@
     "email": "rautaditya@gmail.com",
     "password": "$2b$10$BeVXROqbYLsbPxaZp5iSYeVCMYVkOyVMccOXw6SbK.d38n4K8M7Ky",
     "prakriti": null
+  },
+  {
+    "id": 6,
+    "name": "dsa-jury",
+    "email": "hii@gmail.com",
+    "password": "$2b$10$2XvMQXT3jB9MZMVgE59NJ.TKGgim7uWa8ODPSQ0doRO.1I01a8S4C",
+    "prakriti": "Vata",
+    "explanation": "Based on your responses, your dominant dosha appears to be Vata. Vata types typically have a light, thin build with prominent features and dry skin. They may experience cold hands and feet and have variable digestion and appetite. Mentally, Vatas are creative, energetic, and enthusiastic. They learn quickly but also forget easily. When in balance, they are lively and flexible. When out of balance, they may experience anxiety, insomnia, or digestive issues. To stay balanced, Vatas benefit from regular routines, warm foods, and calming activities like yoga or meditation.",
+    "doshaScores": {
+      "vata": 33,
+      "pitta": 33,
+      "kapha": 33
+    },
+    "lastAssessment": "2025-11-09T18:46:53.691Z"
   }
 ]

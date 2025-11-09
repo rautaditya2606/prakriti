@@ -505,7 +505,7 @@
                         <h3><i class="fas fa-user-circle"></i> Your Prakriti</h3>
                         <div class="prakriti-value"><%= user.prakriti.type || 'Not assessed' %></div>
                         <% if (user.prakriti.description) { %>
-                            <div class="prakriti-description"><%= user.prakriti.description %></div>
+                            <div class="prakriti-description"><%= user.prakriti.description %> Give Daily Routine according to the prakriti</div>
                         <% } %>
                     </div>
                 <% } %>
@@ -568,7 +568,7 @@
         </main>
     </div>
 
-    <form id="chat-form">
+    <!-- <form id="chat-form">
         <label for="prakriti">Select Your Prakriti:</label>
         <select id="prakriti" name="prakriti">
             <option value="Vata">Vata</option>
@@ -586,7 +586,7 @@
         <textarea id="message" name="message" required></textarea>
 
         <button type="submit">Send</button>
-    </form>
+    </form> -->
 
     <script>
         // Mobile menu toggle
@@ -740,16 +740,15 @@
             const now = new Date();
             const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-            // STRIP HTML TAGS - This is the key fix
-            let plainText = text.replace(/<[^>]*>/g, ''); // Remove all HTML tags
+            // AGGRESSIVE HTML STRIPPING - Remove anything that looks like HTML
+            let cleanText = text
+                .replace(/<[^>]*>/g, '') // Remove HTML tags
+                .replace(/&nbsp;/g, ' ') // Replace &nbsp; with regular spaces
+                .replace(/&[a-z]+;/g, '') // Remove other HTML entities
+                .trim();
 
-            // Convert newlines to <br> and escape HTML
-            let formattedText = plainText.replace(/\n/g, '<br>').replace(/[&<>]/g, 
-                tag => ({
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;'
-                }[tag]));
+            // Convert newlines to <br>
+            let formattedText = cleanText.replace(/\n/g, '<br>');
 
             messageDiv.innerHTML = `
                 <div class="message-content">${formattedText}</div>

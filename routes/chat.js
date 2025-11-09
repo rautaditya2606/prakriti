@@ -28,7 +28,11 @@ const QUESTIONS = [
 // Middleware to check if user is authenticated
 function isAuthenticated(req, res, next) {
   if (!req.session.userId) {
-    return res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).render('error', {
+        errorCode: 401,
+        errorMessage: 'Unauthorized',
+        errorDescription: 'You do not have permission to access this resource. Please log in or contact support if you believe this is an error.'
+    });
   }
   next();
 }
@@ -598,17 +602,25 @@ router.post('/send-message', async (req, res) => {
 
   const systemPrompt = {
     role: "system",
-    content: "You are an expert Ayurvedic practitioner specializing in Prakriti assessment. You must provide clear, concise, and accurate explanations of Vata, Pitta, and Kapha types, their characteristics, imbalances, and lifestyle recommendations. Tailor your responses to the user's Prakriti profile if provided."
+    content: `You are an Ayurvedic Prakriti specialist. When given a user's Prakriti type and traits, you must provide detailed recommendations in the following structured format: 
+
+1. Daily Routine:
+  - Morning:
+  - Afternoon:
+  - Evening:
+  - Before Sleep:
+
+2. Meals:
+  - Breakfast:
+  - Lunch:
+  - Dinner:
+
+Be specific to the user's Prakriti, including dosha-balancing activities, foods, and lifestyle tips. Avoid generic explanations.`
   };
 
   const userMessage = {
     role: "user",
-    content: {
-      prakriti,
-      traits,
-      imbalances,
-      message
-    }
+    content: `User Prakriti: ${prakriti}. Traits: ${traits.join(', ')}. Imbalances: ${imbalances.join(', ')}. ${message}`
   };
 
   try {
